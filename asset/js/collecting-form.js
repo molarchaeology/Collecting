@@ -42,6 +42,7 @@ var populatePromptRow = function(promptData) {
     promptRow.find('.prompt-resource-query').val(promptData['o-module-collecting:resource_query']);
     promptRow.find('.prompt-custom-vocab').val(promptData['o-module-collecting:custom_vocab']);
     promptRow.find('.prompt-media-type').val(promptData['o-module-collecting:media_type']);
+    promptRow.find('.prompt-multiple').val(promptData['o-module-collecting:multiple'] ? '1' : '0');
     promptRow.find('.prompt-required').val(promptData['o-module-collecting:required'] ? '1' : '0');
     if (promptData['o:property']) {
         promptRow.find('.prompt-property-id').val(promptData['o:property']['o:id']);
@@ -65,6 +66,7 @@ var resetSidebar = function() {
     $('#prompt-select-options').val('').closest('.sidebar-section').hide();
     $('#prompt-resource-query').val('').closest('.sidebar-section').hide();
     $('#prompt-custom-vocab').val('').closest('.sidebar-section').hide();
+    $('#prompt-multiple').prop('checked', false).closest('.sidebar-section').hide();
     $('#prompt-required').prop('checked', false).closest('.sidebar-section').hide();
     $('#prompt-save').hide();
 
@@ -130,13 +132,14 @@ var setCustomVocabSection = function(prompt) {
         customVocab = ''; // Custom vocab does not exist
     }
     customVocabSelect.val(customVocab).closest('.sidebar-section').show();
+    $('#prompt-multiple').closest('.sidebar-section').show();
 }
 
 $(document).ready(function() {
 
     $('#prompts-table').hide();
 
-    // Append existing prompts on load. 
+    // Append existing prompts on load.
     var promptsData = $('#prompts').data('promptsData');
     if (!promptsData.length) {
         // Always add a "dcterms:title" property prompt to a form without
@@ -148,6 +151,7 @@ $(document).ready(function() {
             'o-module-collecting:input_type': 'text',
             'o-module-collecting:select_options': null,
             'o-module-collecting:media_type': null,
+            'o-module-collecting:multiple': false,
             'o-module-collecting:required': true,
             'o:property': {'o:id': $('#prompt-property option[data-term="dcterms:title"]').val()},
         }];
@@ -176,6 +180,7 @@ $(document).ready(function() {
         var selectOptionsSection = $('#prompt-select-options').closest('.sidebar-section');
         var resourceQuerySection = $('#prompt-resource-query').closest('.sidebar-section');
         var customVocabSection = $('#prompt-custom-vocab').closest('.sidebar-section');
+        var multipleSection = $('#prompt-custom-vocab').closest('.sidebar-section');
         if ('select' === inputType) {
             selectOptionsSection.show();
         } else {
@@ -190,6 +195,11 @@ $(document).ready(function() {
             customVocabSection.show();
         } else {
             customVocabSection.hide();
+        }
+        if (['select', 'item', 'custom_vocab'].includes(inputType)) {
+            multipleSection.show();
+        } else {
+            multipleSection.hide();
         }
     });
 
@@ -249,10 +259,12 @@ $(document).ready(function() {
                 if ('select' === inputType) {
                     var selectOptions = prompt.find('.prompt-select-options').val();
                     $('#prompt-select-options').val(selectOptions).closest('.sidebar-section').show();
+                    $('#prompt-multiple').closest('.sidebar-section').show();
                 }
                 if ('item' === inputType) {
                     var resourceQuery = prompt.find('.prompt-resource-query').val();
                     $('#prompt-resource-query').val(resourceQuery).closest('.sidebar-section').show();
+                    $('#prompt-multiple').closest('.sidebar-section').show();
                 }
                 if ('custom_vocab' === inputType) {
                     setCustomVocabSection(prompt);
@@ -289,6 +301,7 @@ $(document).ready(function() {
 
         // A prompt type cannot be changed once it's saved.
         $('#prompt-type').prop('disabled', true).css('background-color', '#dfdfdf');
+        $('#prompt-multiple').prop('checked', '1' === prompt.find('.prompt-multiple').val() ? true : false);
         $('#prompt-required').prop('checked', '1' === prompt.find('.prompt-required').val() ? true : false);
         Omeka.openSidebar($('#prompt-sidebar'));
     });
@@ -305,6 +318,7 @@ $(document).ready(function() {
             'o-module-collecting:resource_query': $('#prompt-resource-query').val(),
             'o-module-collecting:custom_vocab': $('#prompt-custom-vocab').val(),
             'o-module-collecting:media_type': $('#prompt-media-type').val(),
+            'o-module-collecting:multiple': $('#prompt-multiple').prop('checked'),
             'o-module-collecting:required': $('#prompt-required').prop('checked'),
             'o:property': {'o:id': $('#prompt-property').val()},
         };

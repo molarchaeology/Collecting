@@ -166,12 +166,27 @@ class IndexController extends AbstractActionController
         $itemData = [];
         $cItemData = [];
         $inputData = [];
+        $input = null;
+        $text = null;
 
         // Note that we're iterating the known prompts, not the ones submitted
         // with the form. This way we accept only valid prompts.
         foreach ($cForm->prompts() as $prompt) {
             if (!isset($postedPrompts[$prompt->id()])) {
                 // This prompt was not found in the POSTed data.
+                continue;
+            }
+            if ($prompt->multiple() || $prompt->type() === 'media') {
+                // If Multiple input then array not string and Prompt Type must decide how to encode to text
+                $input = $postedPrompts[$prompt->id()];
+                $text = null;
+            } else {
+                // Single input, so string
+                $input = trim($postedPrompts[$prompt->id()]);
+                $text = $input;
+            }
+            // If empty input then don't add to Item or Input
+            if (empty($input)) {
                 continue;
             }
             switch ($prompt->type()) {
@@ -181,70 +196,93 @@ class IndexController extends AbstractActionController
                             $itemData[$prompt->property()->term()][] = [
                                 'type' => 'uri',
                                 'property_id' => $prompt->property()->id(),
-                                '@id' => $postedPrompts[$prompt->id()],
+                                '@id' => $input,
                             ];
                             break;
+                        case 'select':
+                            $inputs = $prompt->multiple() ? $input : [$input];
+                            $text = implode(';', $inputs);
+                            foreach ($inputs as $value) {
+                                $itemData[$prompt->property()->term()][] = [
+                                    'type' => 'literal',
+                                    'property_id' => $prompt->property()->id(),
+                                    '@value' => $value,
+                                ];
+                            }
+                            break;
                         case 'item':
-                            $itemData[$prompt->property()->term()][] = [
-                                'type' => 'resource',
-                                'property_id' => $prompt->property()->id(),
-                                'value_resource_id' => $postedPrompts[$prompt->id()],
-                            ];
+                            $inputs = $prompt->multiple() ? $input : [$input];
+                            $text = implode(';', $inputs);
+                            foreach ($inputs as $value_resource_id) {
+                                $itemData[$prompt->property()->term()][] = [
+                                    'type' => 'resource',
+                                    'property_id' => $prompt->property()->id(),
+                                    'value_resource_id' => $value_resource_id,
+                                ];
+                            }
                             break;
                         case 'numeric:timestamp':
                             $itemData[$prompt->property()->term()][] = [
                                 'type' => 'numeric:timestamp',
                                 'property_id' => $prompt->property()->id(),
-                                '@value' => $postedPrompts[$prompt->id()],
+                                '@value' => $input,
                             ];
                             break;
                         case 'numeric:interval':
                             $itemData[$prompt->property()->term()][] = [
                                 'type' => 'numeric:interval',
                                 'property_id' => $prompt->property()->id(),
-                                '@value' => $postedPrompts[$prompt->id()],
+                                '@value' => $input,
                             ];
                             break;
                         case 'numeric:duration':
                             $itemData[$prompt->property()->term()][] = [
                                 'type' => 'numeric:duration',
                                 'property_id' => $prompt->property()->id(),
-                                '@value' => $postedPrompts[$prompt->id()],
+                                '@value' => $input,
                             ];
                             break;
                         case 'numeric:integer':
                             $itemData[$prompt->property()->term()][] = [
                                 'type' => 'numeric:integer',
                                 'property_id' => $prompt->property()->id(),
-                                '@value' => $postedPrompts[$prompt->id()],
+                                '@value' => $input,
                             ];
                             break;
                         case 'custom_vocab':
+                            $inputs = $prompt->multiple() ? $input : [$input];
+                            $text = implode(';', $inputs);
                             $customVocab = $this->api()->read('custom_vocabs', $prompt->customVocab())->getContent();
                             $customVocabDataType = sprintf('customvocab:%s', $customVocab->id());
                             switch ($customVocab->type()) {
                                 case 'literal':
-                                    $itemData[$prompt->property()->term()][] = [
-                                        'type' => $customVocabDataType,
-                                        'property_id' => $prompt->property()->id(),
-                                        '@value' => $postedPrompts[$prompt->id()],
-                                    ];
+                                    foreach ($inputs as $value) {
+                                        $itemData[$prompt->property()->term()][] = [
+                                            'type' => $customVocabDataType,
+                                            'property_id' => $prompt->property()->id(),
+                                            '@value' => $value,
+                                        ];
+                                    }
                                     break;
                                 case 'uri':
                                     $customVocabValues = $customVocab->listValues();
-                                    $itemData[$prompt->property()->term()][] = [
-                                        'type' => $customVocabDataType,
-                                        'property_id' => $prompt->property()->id(),
-                                        '@id' => $postedPrompts[$prompt->id()],
-                                        'o:label' => $customVocabValues[$postedPrompts[$prompt->id()]],
-                                    ];
+                                    foreach ($inputs as $value) {
+                                        $itemData[$prompt->property()->term()][] = [
+                                            'type' => $customVocabDataType,
+                                            'property_id' => $prompt->property()->id(),
+                                            '@id' => $input,
+                                            'o:label' => $customVocabValues[$value],
+                                        ];
+                                    }
                                     break;
                                 case 'resource':
-                                    $itemData[$prompt->property()->term()][] = [
-                                        'type' => $customVocabDataType,
-                                        'property_id' => $prompt->property()->id(),
-                                        'value_resource_id' => $postedPrompts[$prompt->id()],
-                                    ];
+                                    foreach ($inputs as $value_resource_id) {
+                                        $itemData[$prompt->property()->term()][] = [
+                                            'type' => $customVocabDataType,
+                                            'property_id' => $prompt->property()->id(),
+                                            'value_resource_id' => $value_resource_id,
+                                        ];
+                                    }
                                     break;
                             }
                             break;
@@ -252,7 +290,7 @@ class IndexController extends AbstractActionController
                             $itemData[$prompt->property()->term()][] = [
                                 'type' => 'literal',
                                 'property_id' => $prompt->property()->id(),
-                                '@value' => $postedPrompts[$prompt->id()],
+                                '@value' => $input,
                             ];
                     }
                     // Note that there's no break here. We need to save all
@@ -261,23 +299,20 @@ class IndexController extends AbstractActionController
                 case 'input':
                 case 'user_private':
                 case 'user_public':
-                    // Do not save empty inputs.
-                    if ('' !== trim($postedPrompts[$prompt->id()])) {
-                        $inputData[] = [
-                            'o-module-collecting:prompt' => $prompt->id(),
-                            'o-module-collecting:text' => $postedPrompts[$prompt->id()],
-                        ];
-                    }
+                    $inputData[] = [
+                        'o-module-collecting:prompt' => $prompt->id(),
+                        'o-module-collecting:text' => $text,
+                    ];
                     break;
                 case 'user_name':
-                    $cItemData['o-module-collecting:user_name'] = $postedPrompts[$prompt->id()];
+                    $cItemData['o-module-collecting:user_name'] = $input;
                     break;
                 case 'user_email':
-                    $cItemData['o-module-collecting:user_email'] = $postedPrompts[$prompt->id()];
+                    $cItemData['o-module-collecting:user_email'] = $input;
                     break;
                 case 'media':
                     $itemData = $this->mediaTypeManager->get($prompt->mediaType())
-                        ->itemData($itemData, $postedPrompts[$prompt->id()], $prompt);
+                        ->itemData($itemData, $input, $prompt);
                     break;
                 default:
                     // Invalid prompt type. Do nothing.

@@ -6,6 +6,7 @@ use Laminas\InputFilter\InputProviderInterface;
 
 class PromptNumericInteger extends IntegerElement implements InputProviderInterface
 {
+    use PromptIsMultipleTrait;
     use PromptIsRequiredTrait;
 
     public function getInputSpecification(): array

@@ -6,6 +6,7 @@ use Laminas\InputFilter\InputProviderInterface;
 
 class PromptTextarea extends Textarea implements InputProviderInterface
 {
+    use PromptIsMultipleTrait;
     use PromptIsRequiredTrait;
 
     public function getInputSpecification(): array

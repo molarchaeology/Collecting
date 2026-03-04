@@ -72,14 +72,47 @@ class CollectingInputRepresentation extends AbstractRepresentation
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
         if (!$acl->userIsAllowed($this->resource, 'view-collecting-input-text')) {
             $displayText = $this->getTranslator()->translate('[private]');
+        } elseif ('select' === $this->prompt()->inputType()) {
+            $displayText = implode(', ', explode(';', $displayText));
         } elseif ('item' === $this->prompt()->inputType()) {
-            try {
-                $item = $this->getServiceLocator()->get('Omeka\ApiManager')
-                    ->read('items', $displayText)->getContent();
-                $displayText = $item->link($item->displayTitle());
-            } catch (\Exception $e) {
-                $displayText = $this->getTranslator()->translate('[unknown item]');
+            $ids = explode(';', $displayText);
+            $displayTexts = [];
+            $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+            foreach ($ids as $id) {
+                try {
+                    $item = $api->read('items', $id)->getContent();
+                    $displayTexts[] = $item->displayTitle();
+                } catch (\Exception $e) {
+                    $displayTexts[] = $this->getTranslator()->translate('[unknown item]');
+                }
             }
+            $displayText = implode(', ', $displayTexts);
+        } elseif ('custom_vocab' === $this->prompt()->inputType()) {
+            $ids = explode(';', $displayText);
+            $displayTexts = [];
+            $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+            try {
+                $customVocab = $api->read('custom_vocabs', $this->prompt()->customVocab())->getContent();
+                switch ($customVocab->type()) {
+                    case 'resource':
+                        foreach ($ids as $id) {
+                            try {
+                                $item = $api->read('items', $id)->getContent();
+                                $displayTexts[] = $item->displayTitle();
+                            } catch (\Exception $e) {
+                                $displayTexts[] = $this->getTranslator()->translate('[unknown item]');
+                            }
+                        }
+                        break;
+                    case 'literal':
+                    case 'uri':
+                        $displayTexts[] = $id;
+                        break;
+                }
+            } catch (\Exception $e) {
+                $displayTexts[] = $this->getTranslator()->translate('[unknown vocab]');
+            }
+            $displayText = implode(', ', $displayTexts);
         }
         return $displayText;
     }

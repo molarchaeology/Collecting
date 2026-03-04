@@ -6,6 +6,7 @@ use Laminas\InputFilter\InputProviderInterface;
 
 class PromptNumericInterval extends IntervalElement implements InputProviderInterface
 {
+    use PromptIsMultipleTrait;
     use PromptIsRequiredTrait;
 
     public function getInputSpecification(): array

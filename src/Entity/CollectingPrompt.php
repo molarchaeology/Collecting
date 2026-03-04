@@ -82,6 +82,11 @@ class CollectingPrompt extends AbstractEntity
     /**
      * @Column(type="boolean", nullable=false)
      */
+    protected $multiple = false;
+
+    /**
+     * @Column(type="boolean", nullable=false)
+     */
     protected $required = false;
 
     /**
@@ -225,6 +230,16 @@ class CollectingPrompt extends AbstractEntity
     public function getMediaType()
     {
         return $this->mediaType;
+    }
+
+    public function setMultiple($multiple)
+    {
+        $this->multiple = (bool) $multiple;
+    }
+
+    public function getMultiple()
+    {
+        return $this->multiple;
     }
 
     public function setRequired($required)

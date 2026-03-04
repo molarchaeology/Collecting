@@ -220,6 +220,7 @@ class CollectingFormRepresentation extends AbstractEntityRepresentation
                         ? $prompt->property()->label()
                         : $prompt->text();
                     $element->setLabel($label)
+                        ->setIsMultiple($prompt->multiple())
                         ->setIsRequired($prompt->required());
                     $form->add($element);
                     break;
