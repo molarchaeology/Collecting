@@ -160,7 +160,7 @@ class CollectingFormRepresentation extends AbstractEntityRepresentation
                         case 'select':
                             $selectOptions = explode("\n", $prompt->selectOptions());
                             $element = new Element\PromptSelect($name);
-                            if ($prompt->getIsMultiple()) {
+                            if ($prompt->multiple()) {
                                 $element->setEmptyOption('Please choose one or more...'); // @translate
                             } else {
                                 $element->setEmptyOption('Please choose one...'); // @translate
@@ -171,7 +171,7 @@ class CollectingFormRepresentation extends AbstractEntityRepresentation
                             parse_str(ltrim($prompt->resourceQuery(), '?'), $resourceQuery);
                             $element = new Element\PromptItem($name);
                             $element->setApiManager($api);
-                            if ($prompt->getIsMultiple()) {
+                            if ($prompt->multiple()) {
                                 $element->setEmptyOption('Please choose one or more...'); // @translate
                             } else {
                                 $element->setEmptyOption('Please choose one...'); // @translate
@@ -193,7 +193,7 @@ class CollectingFormRepresentation extends AbstractEntityRepresentation
                                 continue 3; // The custom vocab does not exist
                             }
                             $element = new Element\PromptSelect($name);
-                            if ($prompt->getIsMultiple()) {
+                            if ($prompt->multiple()) {
                                 $element->setEmptyOption('Please choose one or more...'); // @translate
                             } else {
                                 $element->setEmptyOption('Please choose one...'); // @translate

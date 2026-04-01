@@ -17,9 +17,4 @@ trait PromptIsMultipleTrait
         $this->setAttribute('multiple', $this->multiple);
         return $this;
     }
-
-    public function getIsMultiple()
-    {
-        return $this->multiple;
-    }
 }
