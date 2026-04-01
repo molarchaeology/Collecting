@@ -60,6 +60,11 @@ class CollectingPrompt extends AbstractEntity
     protected $inputType;
 
     /**
+     * @Column(type="json", nullable=true)
+     */
+    protected $inputOptions;
+
+    /**
      * @Column(type="text", nullable=true)
      */
     protected $selectOptions;
@@ -130,6 +135,15 @@ class CollectingPrompt extends AbstractEntity
         ];
     }
 
+    public static function getChoiceOptions()
+    {
+        return [
+            'select' => 'Select menu', // @translate
+            'checkbox' => 'Checkboxes', // @translate
+            'radio' => 'Radio buttons', // @translate
+        ];
+    }
+
     public function __construct()
     {
         $this->inputs = new ArrayCollection;
@@ -188,6 +202,16 @@ class CollectingPrompt extends AbstractEntity
     public function getInputType()
     {
         return $this->inputType;
+    }
+
+    public function setInputOptions($inputOptions)
+    {
+        $this->inputOptions = is_string($inputOptions) ? trim($inputOptions) : null;
+    }
+
+    public function getInputOptions()
+    {
+        return $this->inputOptions;
     }
 
     public function setSelectOptions($selectOptions)

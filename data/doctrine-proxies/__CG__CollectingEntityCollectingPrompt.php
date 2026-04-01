@@ -66,10 +66,10 @@ class CollectingPrompt extends \Collecting\Entity\CollectingPrompt implements \D
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', 'id', 'form', 'inputs', 'position', 'type', 'text', 'inputType', 'selectOptions', 'resourceQuery', 'customVocab', 'mediaType', 'multiple', 'required', 'property'];
+            return ['__isInitialized__', 'id', 'form', 'inputs', 'position', 'type', 'text', 'inputType', 'inputOptions', 'selectOptions', 'resourceQuery', 'customVocab', 'mediaType', 'multiple', 'required', 'property'];
         }
 
-        return ['__isInitialized__', 'id', 'form', 'inputs', 'position', 'type', 'text', 'inputType', 'selectOptions', 'resourceQuery', 'customVocab', 'mediaType', 'multiple', 'required', 'property'];
+        return ['__isInitialized__', 'id', 'form', 'inputs', 'position', 'type', 'text', 'inputType', 'inputOptions', 'selectOptions', 'resourceQuery', 'customVocab', 'mediaType', 'multiple', 'required', 'property'];
     }
 
     /**
@@ -299,6 +299,28 @@ class CollectingPrompt extends \Collecting\Entity\CollectingPrompt implements \D
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getInputType', []);
 
         return parent::getInputType();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setInputOptions($inputOptions)
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setInputOptions', [$inputOptions]);
+
+        return parent::setInputOptions($inputOptions);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getInputOptions()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getInputOptions', []);
+
+        return parent::getInputOptions();
     }
 
     /**

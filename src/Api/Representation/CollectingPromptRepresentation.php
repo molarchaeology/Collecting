@@ -25,6 +25,7 @@ class CollectingPromptRepresentation extends AbstractRepresentation
             'o-module-collecting:type' => $this->type(),
             'o-module-collecting:text' => $this->text(),
             'o-module-collecting:input_type' => $this->inputType(),
+            'o-module-collecting:input_options' => $this->inputOptions() ?? [],
             'o-module-collecting:select_options' => $this->selectOptions(),
             'o-module-collecting:resource_query' => $this->resourceQuery(),
             'o-module-collecting:custom_vocab' => $this->customVocab(),
@@ -53,6 +54,24 @@ class CollectingPromptRepresentation extends AbstractRepresentation
     public function inputType()
     {
         return $this->resource->getInputType();
+    }
+
+    public function inputOptions()
+    {
+        return $this->resource->getInputOptions();
+    }
+
+    /**
+     * Get input option by key.
+     *
+     * @param string $key The input option key
+     * @param mixed $default Return this if key does not exist
+     * @return mixed
+     */
+    public function inputOption($key, $default = null)
+    {
+        $inputOptions = $this->resource->getInputOptions();
+        return $inputOptions[$key] ?? $default;
     }
 
     public function selectOptions()

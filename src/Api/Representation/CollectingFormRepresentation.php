@@ -159,11 +159,18 @@ class CollectingFormRepresentation extends AbstractEntityRepresentation
                             break;
                         case 'select':
                             $selectOptions = explode("\n", $prompt->selectOptions());
-                            $element = new Element\PromptSelect($name);
-                            if ($prompt->multiple()) {
-                                $element->setEmptyOption('Please choose one or more...'); // @translate
+                            $choiceType = $prompt->inputOption('choice', 'select');
+                            if ($choiceType === 'checkbox') {
+                                $element = new Element\PromptMultiCheckbox($name);
+                            } else if ($choiceType === 'radio') {
+                                $element = new Element\PromptRadio($name);
                             } else {
-                                $element->setEmptyOption('Please choose one...'); // @translate
+                                $element = new Element\PromptSelect($name);
+                                if ($prompt->multiple()) {
+                                    $element->setEmptyOption('Please choose one or more...'); // @translate
+                                } else {
+                                    $element->setEmptyOption('Please choose one...'); // @translate
+                                }
                             }
                             $element->setValueOptions(array_combine($selectOptions, $selectOptions));
                             break;
@@ -192,11 +199,18 @@ class CollectingFormRepresentation extends AbstractEntityRepresentation
                             } catch (NotFoundException $e) {
                                 continue 3; // The custom vocab does not exist
                             }
-                            $element = new Element\PromptSelect($name);
-                            if ($prompt->multiple()) {
-                                $element->setEmptyOption('Please choose one or more...'); // @translate
+                            $choiceType = $prompt->inputOption('choice', 'select');
+                            if ($choiceType === 'checkbox') {
+                                $element = new Element\PromptMultiCheckbox($name);
+                            } else if ($choiceType === 'radio') {
+                                $element = new Element\PromptRadio($name);
                             } else {
-                                $element->setEmptyOption('Please choose one...'); // @translate
+                                $element = new Element\PromptSelect($name);
+                                if ($prompt->multiple()) {
+                                    $element->setEmptyOption('Please choose one or more...'); // @translate
+                                } else {
+                                    $element->setEmptyOption('Please choose one...'); // @translate
+                                }
                             }
                             $element->setValueOptions($customVocab->listValues());
                             break;
