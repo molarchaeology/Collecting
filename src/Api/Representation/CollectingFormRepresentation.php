@@ -160,15 +160,23 @@ class CollectingFormRepresentation extends AbstractEntityRepresentation
                         case 'select':
                             $selectOptions = explode("\n", $prompt->selectOptions());
                             $element = new Element\PromptSelect($name);
-                            $element->setEmptyOption('Please choose one...') // @translate
-                                ->setValueOptions(array_combine($selectOptions, $selectOptions));
+                            if ($element->getIsMultiple()) {
+                                $element->setEmptyOption('Please choose one or more...'); // @translate
+                            } else {
+                                $element->setEmptyOption('Please choose one...'); // @translate
+                            }
+                            $element->setValueOptions(array_combine($selectOptions, $selectOptions));
                             break;
                         case 'item':
                             parse_str(ltrim($prompt->resourceQuery(), '?'), $resourceQuery);
                             $element = new Element\PromptItem($name);
                             $element->setApiManager($api);
-                            $element->setEmptyOption('Please choose one...') // @translate
-                                ->setResourceValueOptions('items', function ($item) {
+                            if ($element->getIsMultiple()) {
+                                $element->setEmptyOption('Please choose one or more...'); // @translate
+                            } else {
+                                $element->setEmptyOption('Please choose one...'); // @translate
+                            }
+                            $element->setResourceValueOptions('items', function ($item) {
                                     return sprintf('#%s: %s', $item->id(), mb_substr($item->displayTitle(), 0, 80));
                                 }, $resourceQuery);
                             break;
@@ -185,8 +193,12 @@ class CollectingFormRepresentation extends AbstractEntityRepresentation
                                 continue 3; // The custom vocab does not exist
                             }
                             $element = new Element\PromptSelect($name);
-                            $element->setEmptyOption('Please choose one...') // @translate
-                                ->setValueOptions($customVocab->listValues());
+                            if ($element->getIsMultiple()) {
+                                $element->setEmptyOption('Please choose one or more...'); // @translate
+                            } else {
+                                $element->setEmptyOption('Please choose one...'); // @translate
+                            }
+                            $element->setValueOptions($customVocab->listValues());
                             break;
                         case 'numeric:timestamp':
                             if (!$collecting->inputTypeIsAvailable('numeric:timestamp')) {
