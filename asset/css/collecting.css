@@ -19,6 +19,10 @@
     max-width: 100%;
 }
 
+.field .inputs label {
+    display: flex;
+}
+
 input[type=checkbox], input[type=radio] {
     margin-right: 5px;
 }
