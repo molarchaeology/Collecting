@@ -185,8 +185,8 @@ class IndexController extends AbstractActionController
                 $input = trim($postedPrompts[$prompt->id()]);
                 $text = $input;
             }
-            // If empty input then don't add to Item or Input
-            if (empty($input)) {
+            // If empty non-media input then don't add to Item or Input
+            if ($prompt->type() != 'media' && empty($input)) {
                 continue;
             }
             switch ($prompt->type()) {
